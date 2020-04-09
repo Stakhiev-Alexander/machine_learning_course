@@ -7,7 +7,8 @@ import torch.optim as optim
 import torch.nn as nn
 from torchviz import make_dot
 import torch
-
+from torch import nn
+import torch.nn.functional as F
 
 
 # device = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -15,6 +16,9 @@ import torch
 device = 'cpu'
 print(f"Operated on: {device}")
 
+N = 50 # number of points per class
+D = 2 # dimensionality
+K = 2 # number of classes
 
 def get_data(file_name):
     f = pd.read_csv(file_name)
@@ -28,70 +32,92 @@ def get_data(file_name):
 
 
 def plot_dots(x, y):
-    X_y = zip(X, y)
-    X_0 = []
-    X_1 = []
-    for pare in X_y:
-        if (pare[1] == 0):
-            X_0.append(pare[0])
-        else:
-            X_1.append(pare[0]) 
-
-    X_0_1 = []
-    X_0_2 = []
-    X_1_1 = []
-    X_1_2 = []
-
-    for i in X_0:
-        X_0_1.append(i[0])
-        X_0_2.append(i[1])
-
-    for i in X_1:
-        X_1_1.append(i[0])
-        X_1_2.append(i[1])
+    plt.figure(figsize=(8,6))
+    plt.scatter(x[:, 0], x[:, 1], c=y, s=40, cmap=plt.cm.rainbow)
+    plt.xlabel("x0", fontsize=15)
+    plt.ylabel("x1", fontsize=15)
+    plt.show()
 
 
-    plt.plot(X_0_1, X_0_2, 'o')  
-    plt.plot(X_1_1, X_1_2, 'o')  
-    plt.show()  
+
+X, y = get_data('datasets/nn_1.csv')
+
+# initialize parameters randomly
+W = 0.01 * np.random.randn(D,K)
+b = np.zeros((1,K))
+
+# some hyperparameters
+step_size = 1e-0
+reg = 1e-3 # regularization strength
+
+# gradient descent loop
+num_examples = X.shape[0]
+for i in range(100):
+
+    # evaluate class scores, [N x K]
+    scores = np.dot(X, W) + b
+
+    # compute the class probabilities
+    exp_scores = np.exp(scores)
+    probs = exp_scores / np.sum(exp_scores, axis=1, keepdims=True) # [N x K]
+
+    # compute the loss: average cross-entropy loss and regularization
+    correct_logprobs = -np.log(probs[range(num_examples),y])
+    data_loss = np.sum(correct_logprobs)/num_examples
+    reg_loss = 0.5*reg*np.sum(W*W)
+    loss = data_loss + reg_loss
+    if i % 10 == 0:
+        print ("iteration %d: loss %f" % (i, loss))
+
+    # compute the gradient on scores
+    dscores = probs
+    dscores[range(num_examples),y] -= 1
+    dscores /= num_examples
+
+    # backpropate the gradient to the parameters (W,b)
+    dW = np.dot(X.T, dscores)
+    db = np.sum(dscores, axis=0, keepdims=True)
+
+    dW += reg*W # regularization gradient
+
+    # perform a parameter update
+    W += -step_size * dW
+    b += -step_size * db
+
+scores = np.dot(X, W) + b
+predicted_class = np.argmax(scores, axis=1)
+print ('training accuracy: %.2f' % (np.mean(predicted_class == y)))
+
+h = 0.02
+x_min, x_max = X[:, 0].min() - 1, X[:, 0].max() + 1
+y_min, y_max = X[:, 1].min() - 1, X[:, 1].max() + 1
 
 
-x, y = get_data('datasets/nn_0.csv')
+xx, yy = np.meshgrid(np.arange(x_min, x_max, h),
+                     np.arange(y_min, y_max, h))
 
-# plot_dots(x, y)
+# grid_tensor = torch.FloatTensor(np.c_[xx.ravel(), yy.ravel()])
 
-x_train = []
-y_train = []
-x_test = []
-y_test = []
+Z = np.dot(np.c_[xx.ravel(), yy.ravel()], W) + b
+Z = np.argmax(Z, axis=1)
+Z = Z.reshape(xx.shape)
 
-x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.33)
+plt.figure(figsize=(8,6))
 
-x_train_tensor = torch.from_numpy(x_train).float().to(device)
-y_train_tensor = torch.from_numpy(y_train).float().to(device)
+plt.contourf(xx, yy, Z, cmap=plt.cm.rainbow, alpha=0.3)
+plt.scatter(X[:, 0], X[:, 1], c=y, s=40, cmap=plt.cm.rainbow)
 
-print(type(x_train), type(x_train_tensor), x_train_tensor.type())
+plt.xlim(xx.min(), xx.max())
+plt.ylim(yy.min(), yy.max())
 
-a = torch.randn(1, requires_grad=True, dtype=torch.float, device=device)
-b = torch.randn(1, requires_grad=True, dtype=torch.float, device=device)
-print(a, b)
+plt.xlabel("x0", fontsize=15)
+plt.ylabel("x1", fontsize=15)
+plt.show()
 
-import torch.nn.functional as F
 
-def fit():
-    for epoch in range(epochs):
-        for i in range((n - 1) // bs + 1):
-            start_i = i * bs
-            end_i = start_i + bs
-            xb = x_train[start_i:end_i]
-            yb = y_train[start_i:end_i]
-            pred = model(xb)
-            loss = loss_func(pred, yb)
 
-            loss.backward()
-            with torch.no_grad():
-                for p in model.parameters():
-                    p -= p.grad * lr
-                model.zero_grad()
 
-loss_func = F.cross_entropy
+
+
+
+
