@@ -14,7 +14,7 @@ D = 2 # dimensionality
 K = 2 # number of classes
 
 
-device = torch.device('cpu')
+device = torch.device('cuda')
 
 
 class Net(nn.Module):
