@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 import math
 import matplotlib.pyplot as plt
-from scipy.cluster.hierarchy import dendrogram
+from scipy.cluster.hierarchy import dendrogram, linkage
 from sklearn.cluster import AgglomerativeClustering
 from sklearn.cluster import DBSCAN
 import matplotlib.image as img
@@ -60,7 +60,7 @@ def task_2():
   task_2_subtask('./datasets/clustering_3.csv')
 
 def plot_dendrogram(model, **kwargs):
-
+    
     # Children of hierarchical clustering
     children = model.children_
 
@@ -95,24 +95,59 @@ def task_4():
 
   # replace NaN with 0
   # x = np.nan_to_num(x)
-
   # replace NaN with mean
   col_mean = np.nanmean(x, axis=0)
   inds = np.where(np.isnan(x))
   x[inds] = np.take(col_mean, inds[1])
 
+  i = 0
+  arr = []
+
+  for row in x:
+    arr.append([i, sum(row)/31])
+    i+=1
+
+  arr = sorted(arr, key=lambda x:x[1])
+
+  for el in arr:
+    print(f"State {el[0]} = {el[1]}")
+
   model = AgglomerativeClustering(n_clusters=2)
 
   model = model.fit(x)
   plt.title('Hierarchical Clustering Dendrogram for votes.csv')
-  plot_dendrogram(model, labels=model.labels_)
+  # plot_dendrogram(model, labels=model.labels_)
+  plot_dendrogram(model)
   plt.show()
 
 
 def task_1():
-	return "olo"
+  X = get_data_4('./datasets/pluton.csv')
+  k = 4
+  max_iter = 100
+  km = KMeans(n_clusters=k, max_iter=max_iter, precompute_distances=True).fit(X)
+  y = km.predict(X)
+  print(km.scores_)
+
+  # centers = km.cluster_centers_
+  # plot_results(X, y, centers)
 
 
-task_1()
-task_2()
+# task_1()
+# task_2()
 task_4()
+
+
+# X=get_data_2('./datasets/clustering_1.csv')
+
+# y = DBSCAN(eps=0.222, min_samples=3).fit_predict(X)
+# centers = []
+# print(y)
+# plot_results(X, y, centers)
+
+# for i in range(1, 5000):
+#     for j in range(1,25):
+#         y = DBSCAN(eps=(i/1000.0), min_samples=j).fit_predict(X)
+#         if ((1 in y) and (not(2 in y)) and (not(-1 in y))):
+#             print(i)
+#             print(j)   

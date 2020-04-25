@@ -49,5 +49,5 @@ fig.subplots_adjust(wspace=0.05)
 ax[0].imshow(sample_img)
 ax[0].set_title('Original Image', size=16)
 ax[1].imshow(sample_img_recolored)
-ax[1].set_title('8-color Image', size=16);
+ax[1].set_title('8-color Image', size=16)
 plt.show()
