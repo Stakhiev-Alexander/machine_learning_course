@@ -6,8 +6,10 @@ import matplotlib.pyplot as plt
 from scipy.cluster.hierarchy import dendrogram, linkage
 from sklearn.cluster import AgglomerativeClustering
 from sklearn.cluster import DBSCAN
+from sklearn import metrics
 import matplotlib.image as img
 from scipy import misc 
+from sklearn import preprocessing
 from matplotlib.pyplot import imread
 
 def plot_results(X, y, centers):
@@ -116,26 +118,41 @@ def task_4():
 
   model = model.fit(x)
   plt.title('Hierarchical Clustering Dendrogram for votes.csv')
-  # plot_dendrogram(model, labels=model.labels_)
   plot_dendrogram(model)
   plt.show()
 
 
 def task_1():
   X = get_data_4('./datasets/pluton.csv')
+  print(X)
   k = 4
-  max_iter = 100
-  km = KMeans(n_clusters=k, max_iter=max_iter, precompute_distances=True).fit(X)
-  y = km.predict(X)
-  print(km.scores_)
+  max_iters = [1, 100, 10000]
+  print("Non standardized")
+  for max_iter in max_iters:
+	  km = KMeans(n_clusters=k, max_iter=max_iter).fit(X)
+	  y = km.labels_
+	  print(f" max_iter = {max_iter}")
+	  print(f" 	Silhouette Coefficient = {metrics.silhouette_score(X, y, metric='euclidean')}")
+	  print(f" 	Calinski-Harabasz Index = {metrics.calinski_harabasz_score(X, y)}")
+	  print(f"	Davies-Bouldin Index = {metrics.davies_bouldin_score(X, y)}")
 
+  X = preprocessing.scale(X)
+  print()
+  print("Standardized")
+  for max_iter in max_iters:
+	  km = KMeans(n_clusters=k, max_iter=max_iter).fit(X)
+	  y = km.labels_
+	  print(f" max_iter = {max_iter}")
+	  print(f"	Silhouette Coefficient = {metrics.silhouette_score(X, y, metric='euclidean')}")
+	  print(f" 	Calinski-Harabasz Index = {metrics.calinski_harabasz_score(X, y)}")
+	  print(f" 	Davies-Bouldin Index = {metrics.davies_bouldin_score(X, y)}")	  
   # centers = km.cluster_centers_
   # plot_results(X, y, centers)
 
 
-# task_1()
+task_1()
 # task_2()
-task_4()
+# task_4()
 
 
 # X=get_data_2('./datasets/clustering_1.csv')

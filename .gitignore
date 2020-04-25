@@ -1,3 +1,6 @@
+#bak files from Linux FreeOffice
+*.bak
+
 # MNIST data folder
 data
 
