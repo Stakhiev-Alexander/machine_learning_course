@@ -55,7 +55,7 @@ def train(x, y, feature_names, target_names, res_graph_name):
 
     clf = tree.DecisionTreeClassifier(min_samples_leaf=4)
     clf = clf.fit(train_x_data, train_y_data)
-
+    print(clf.feature_importances_)
     dot_data = tree.export_graphviz(clf, out_file=None,
                                     feature_names=feature_names,
                                     class_names=target_names,

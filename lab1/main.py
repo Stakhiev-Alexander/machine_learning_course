@@ -29,8 +29,8 @@ def main():
         # done
         # Task 5
         if (arg == 5):
-            decision_tree.glass_example_tree()
-            # decision_tree.spam7_example_tree()
+            # decision_tree.glass_example_tree()
+            decision_tree.spam7_example_tree()
             return
         # done
         # Task 6

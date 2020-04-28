@@ -92,9 +92,9 @@ def get_titanic_dataset_data(file_name):
 
 
 def task_3():
-  X_train, y_train = get_titanic_dataset_data('datasets/titanic_train.csv')
+  X_train, y_train = get_titanic_dataset_data('datasets/titanic.csv')
   estimators = [
-    ('rf', RandomForestClassifier(n_estimators=10, random_state=42)),
+    ('rf', RandomForestClassifier(n_estimators=500, random_state=42)),
     ('svr', make_pipeline(StandardScaler(), LinearSVC(random_state=42)))
   ]
   model = StackingClassifier(estimators=estimators, final_estimator=LogisticRegression()).fit(X_train, y_train)
