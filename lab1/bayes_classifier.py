@@ -111,7 +111,7 @@ def dots_example():
     x1_arr_class_2 = []
 
     for i in range(80):
-        x0 = np.random.normal(13, 2)
+        x0 = np.random.normal(13z, 2)
         x1 = np.random.normal(20, 2)
         x0_arr_class_1.append(x0)
         x1_arr_class_1.append(x1)

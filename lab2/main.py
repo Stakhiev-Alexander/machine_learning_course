@@ -185,7 +185,6 @@ def train_2(X, y):
     W2 = 0.01 * np.random.randn(h,K)
     b2 = np.zeros((1,K))
 
-    # some hyperparameters
     step_size = 1e-0
     reg = 1e-3 # regularization strength
 
@@ -193,7 +192,7 @@ def train_2(X, y):
     num_examples = X.shape[0]
     for i in range(1000):
         # evaluate class scores, [N x K]
-        hidden_layer = np.maximum(0, np.dot(X, W) + b) # note, ReLU activation
+        hidden_layer = np.maximum(0, np.dot(X, W) + b) # ReLU activation
         scores = np.dot(hidden_layer, W2) + b2
 
         # compute the class probabilities
