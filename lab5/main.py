@@ -1,4 +1,5 @@
 import pandas as pd
+import itertools
 import numpy as np
 from mpl_toolkits import mplot3d
 import matplotlib.pyplot as plt
@@ -46,8 +47,8 @@ def task_1():
   print(f'X : {cross_val_score(regrZ,list(zip(z,y)), x, cv=cvX).mean()}')
 
 
-def reduce_dimensions(data, feature_number):
-  return data.drop(data.columns[feature_number], axis=1)
+def reduce_dimensions(data, feature_name):
+  return data.drop(feature_name, axis=1)
 
 
 def task_2():
@@ -59,17 +60,31 @@ def task_2():
   cv = ShuffleSplit(n_splits=5, test_size=0.3, random_state=0)
   print(f'With all x : {cross_val_score(regr, x, y, cv=cv).mean()}')  
 
-  for i in range(4):
+  feature_list = ['x1', 'x2', 'x3', 'x4']
+  feature_list_2 = list(itertools.combinations(feature_list, r=2))
+  feature_list_3 = list(itertools.combinations(feature_list, r=3))
+
+  for i in feature_list:
     x_reduced = reduce_dimensions(x, i)
     regr = LinearRegression()
     cv = ShuffleSplit(n_splits=5, test_size=0.3, random_state=0)
-    print(f'Without x{i+1} : {cross_val_score(regr, x_reduced, y, cv=cv).mean()}')
+    print(f'Without {i} : {cross_val_score(regr, x_reduced, y, cv=cv).mean()}')
 
-  x_reduced = reduce_dimensions(x, 2)
-  x_reduced = reduce_dimensions(x_reduced, 2)
-  regr = LinearRegression()
-  cv = ShuffleSplit(n_splits=5, test_size=0.3, random_state=0)
-  print(f'Without x3 and x4 : {cross_val_score(regr, x_reduced, y, cv=cv).mean()}')
+  for i in feature_list_2:
+    x_reduced = reduce_dimensions(x, i[0])
+    x_reduced = reduce_dimensions(x_reduced, i[1])
+    regr = LinearRegression()
+    cv = ShuffleSplit(n_splits=5, test_size=0.3, random_state=0)
+    print(f'Without {i[0]}, {i[1]} : {cross_val_score(regr, x_reduced, y, cv=cv).mean()}')
+
+  for i in feature_list_3:
+    x_reduced = reduce_dimensions(x, i[0])
+    x_reduced = reduce_dimensions(x_reduced, i[1])
+    x_reduced = reduce_dimensions(x_reduced, i[2])
+    regr = LinearRegression()
+    cv = ShuffleSplit(n_splits=5, test_size=0.3, random_state=0)
+    print(f'Without {i[0]}, {i[1]}, {i[2]} : {cross_val_score(regr, x_reduced, y, cv=cv).mean()}')
+
   plot_dots_3d(x_reduced.x1.values, x_reduced.x2.values, y, ['x1', 'x2', 'y'])  
 
 
@@ -271,7 +286,7 @@ def task_7():
   dist = f.dist.values
   plt.xlabel('speed')
   plt.ylabel('distance')
-  plt.plot(speed, dist)
+  plt.scatter(speed, dist, marker='.', c='red')
   plt.show()
 
   x_train, x_test, y_train, y_test = train_test_split(speed, dist, test_size=0.3, shuffle=True)
